@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>創建跑馬燈的json吧！</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+        }
+
+        .left-panel,
+        .right-panel {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .left-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 0 20px 20px 0;
+            margin: 20px 0 20px 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .right-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px 0 0 20px;
+            margin: 20px 20px 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header { margin-bottom: 10px; }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sub-header {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        a { color: #667eea; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        label { display: block; margin: 10px 0 5px; }
+
+        .required::after { content: " *"; color: #e74c3c; }
+
+        input, select, textarea {
+            width: calc(100% - 40px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .condition {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            background: #f9f9f9;
+        }
+
+        #jsonOutput {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            white-space: pre-wrap;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .copy-button {
+            margin-left: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            color: #333;
+            padding: 25px;
+            border-radius: 20px;
+            width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 1001;
+        }
+
+        .modal p span { color: #e74c3c; font-weight: bold; }
+
+        .error { border: 2px solid #e74c3c !important; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="header">
+                <h1>創建跑馬燈的json吧！</h1>
+            </div>
+            <p class="sub-header">
+                <a href="https://bryan47nice.github.io/JsonMarqueeGenerator/JsonMarqueeGeneratorInstruction.html"
+                    target="_blank">查看文件</a> | 若操作上有遇到問題請聯繫仕祺
+            </p>
+            <form id="userForm">
+                <div id="conditionsContainer"></div>
+                <button type="button" id="clearButton">清除設定</button>
+                <button type="submit">提交</button>
+            </form>
+        </div>
+
+        <!-- 右側輸出區域 -->
+        <div class="right-panel">
+            <h2 style="padding: 10px 0; margin-bottom: 10px; color: #333; display: flex; align-items: center; justify-content: space-between;">
+                領取你的跑馬燈
+                <button class="copy-button" id="copyButton">一鍵複製</button>
+            </h2>
+            <pre id="jsonOutput">尚無輸出，請填寫左側表單後提交。</pre>
+        </div>
+    </div>
+
+    <!-- 時間錯誤彈窗 -->
+    <div id="timeErrorModal" class="modal-overlay">
+        <div class="modal">
+            <p>時間設定有誤，<span>開始時間不得晚於結束時間唷！</span></p>
+            <button id="timeErrorButton">我知道了</button>
+        </div>
+    </div>
+
+    <!-- 刪除條件警告彈窗 -->
+    <div id="deleteWarningModal" class="modal-overlay">
+        <div class="modal">
+            <p>此跑馬燈設定須至少保有一組跑馬燈！<span style="color: #e74c3c; font-weight: bold;">至少保有一組</span></p>
+            <button id="deleteWarningButton">我知道了</button>
+        </div>
+    </div>
+
+    <script>
+        const conditionsContainer = document.getElementById('conditionsContainer');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const timeErrorModal = document.getElementById('timeErrorModal');
+        const deleteWarningModal = document.getElementById('deleteWarningModal');
+        const timeErrorButton = document.getElementById('timeErrorButton');
+        const deleteWarningButton = document.getElementById('deleteWarningButton');
+        const copyButton = document.getElementById('copyButton');
+
+        function createCondition(userType = '', text = '', color = '0', startTime = '', endTime = '', url = '', index = conditionsContainer.children.length + 1) {
+            const conditionDiv = document.createElement('div');
+            conditionDiv.className = 'condition';
+
+            conditionDiv.innerHTML = `
+                <h3>條件 ${index}</h3>
+                <label class="required" for="userType${index}">用戶類型：</label>
+                <select id="userType${index}" required>
+                    <option value="">請選擇</option>
+                    <option value="0" ${userType === '0' ? 'selected' : ''}>全部用戶</option>
+                    <option value="1" ${userType === '1' ? 'selected' : ''}>專業版用戶</option>
+                    <option value="2" ${userType === '2' ? 'selected' : ''}>免費版用戶</option>
+                </select>
+
+                <label class="required" for="text${index}">文本內容：</label>
+                <textarea id="text${index}" rows="2" required>${text}</textarea>
+
+                <label for="color${index}">顏色 (預設白)：</label>
+                <select id="color${index}">
+                    <option value="0" ${color === '0' ? 'selected' : ''}>白</option>
+                    <option value="1" ${color === '1' ? 'selected' : ''}>黑</option>
+                    <option value="2" ${color === '2' ? 'selected' : ''}>橘</option>
+                    <option value="3" ${color === '3' ? 'selected' : ''}>紅</option>
+                    <option value="4" ${color === '4' ? 'selected' : ''}>綠</option>
+                    <option value="5" ${color === '5' ? 'selected' : ''}>藍</option>
+                    <option value="6" ${color === '6' ? 'selected' : ''}>紫</option>
+                </select>
+
+                <label for="startTime${index}">開始時間：</label>
+                <input type="text" id="startTime${index}" placeholder="YYYY/MM/DD HH:MM" value="${startTime}">
+
+                <label for="endTime${index}">結束時間：</label>
+                <input type="text" id="endTime${index}" placeholder="YYYY/MM/DD HH:MM" value="${endTime}">
+
+                <label for="url${index}">URL (有填寫網址才具備跳轉功能唷！)：</label>
+                <input type="url" id="url${index}" placeholder="請輸入完整的 URL" value="${url}">
+
+                <button type="button" onclick="removeCondition(this)">刪除條件</button>
+                <button type="button" onclick="addConditionBefore(this)">向上新增</button>
+                <button type="button" onclick="addConditionAfter(this)">向下新增</button>
+            `;
+
+            conditionsContainer.appendChild(conditionDiv);
+
+            const startPicker = flatpickr(`#startTime${index}`, {
+                enableTime: true,
+                dateFormat: "Y/m/d H:i",
+                onChange: function (selectedDates, dateStr) {
+                    checkTimesForCondition(index);
+                }
+            });
+
+            const endPicker = flatpickr(`#endTime${index}`, {
+                enableTime: true,
+                dateFormat: "Y/m/d H:i",
+                onChange: function (selectedDates, dateStr) {
+                    checkTimesForCondition(index);
+                }
+            });
+        }
+
+        function checkTimesForCondition(index) {
+            const startTimeInput = document.querySelector(`#startTime${index}`);
+            const endTimeInput = document.querySelector(`#endTime${index}`);
+
+            if (startTimeInput.value && endTimeInput.value) {
+                const startTime = new Date(startTimeInput.value);
+                const endTime = new Date(endTimeInput.value);
+
+                if (startTime > endTime) {
+                    startTimeInput.classList.add('error');
+                    endTimeInput.classList.add('error');
+                    timeErrorModal.style.display = 'flex'; // 使用 flex 而不是 block
+                } else {
+                    startTimeInput.classList.remove('error');
+                    endTimeInput.classList.remove('error');
+                }
+            }
+        }
+        function removeCondition(button) {
+            if (conditionsContainer.children.length <= 1) {
+                deleteWarningModal.style.display = 'flex';
+            } else {
+                const conditionDiv = button.parentElement;
+                conditionsContainer.removeChild(conditionDiv);
+                updateConditionNumbers();
+            }
+        }
+
+        function addConditionBefore(button) {
+            const conditionDiv = button.parentElement;
+            const index = Array.from(conditionsContainer.children).indexOf(conditionDiv);
+            createCondition('', '', '0', '', '', '', index + 1);
+            conditionsContainer.insertBefore(conditionsContainer.lastChild, conditionDiv);
+            updateConditionNumbers();
+        }
+
+        function addConditionAfter(button) {
+            const conditionDiv = button.parentElement;
+            const index = Array.from(conditionsContainer.children).indexOf(conditionDiv);
+            createCondition('', '', '0', '', '', '', index + 2);
+            conditionsContainer.insertBefore(conditionsContainer.lastChild, conditionDiv.nextSibling);
+            updateConditionNumbers();
+        }
+
+        function updateConditionNumbers() {
+            const conditions = conditionsContainer.children;
+            for (let i = 0; i < conditions.length; i++) {
+                conditions[i].querySelector('h3').textContent = `條件 ${i + 1}`;
+            }
+        }
+
+        document.getElementById('userForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            let isValid = true;
+
+            const conditions = Array.from(conditionsContainer.children).map((condition, index) => {
+                const userTypeElement = condition.querySelector(`#userType${index + 1}`);
+                const textElement = condition.querySelector(`#text${index + 1}`);
+                const colorElement = condition.querySelector(`#color${index + 1}`);
+                const startTimeInput = condition.querySelector(`#startTime${index + 1}`);
+                const endTimeInput = condition.querySelector(`#endTime${index + 1}`);
+                const urlElement = condition.querySelector(`#url${index + 1}`);
+
+                // 將 userType 和 color 轉換為整數
+                const userType = parseInt(userTypeElement.value, 10);
+                const text = textElement.value;
+                const color = parseInt(colorElement.value, 10);
+                const url = urlElement.value;
+
+                // 檢查時間
+                if (startTimeInput.value && endTimeInput.value) {
+                    const startTime = new Date(startTimeInput.value);
+                    const endTime = new Date(endTimeInput.value);
+
+                    if (startTime > endTime) {
+                        isValid = false;
+                        startTimeInput.classList.add('error');
+                        endTimeInput.classList.add('error');
+                    } else {
+                        startTimeInput.classList.remove('error');
+                        endTimeInput.classList.remove('error');
+                    }
+                }
+
+                return {
+                    userType,
+                    text,
+                    color,
+                    startTime: startTimeInput.value,
+                    endTime: endTimeInput.value,
+                    url
+                };
+            });
+
+            if (!isValid) {
+                timeErrorModal.style.display = 'flex';  // 使用 flex 而不是 block
+                return;
+            }
+
+            jsonOutput.textContent = JSON.stringify(conditions, null, 2);
+        });
+
+        timeErrorButton.addEventListener('click', () => {
+            timeErrorModal.style.display = 'none';
+        });
+
+        deleteWarningButton.addEventListener('click', () => {
+            deleteWarningModal.style.display = 'none';
+        });
+
+        document.getElementById('clearButton').addEventListener('click', function () {
+            Array.from(conditionsContainer.children).forEach(condition => {
+                // 清除所有 <textarea>
+                condition.querySelectorAll('textarea').forEach(textarea => {
+                    textarea.value = '';
+                });
+
+                // 清除所有 input[type="text"]
+                condition.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+
+                // 清除所有 input[type="url"]
+                condition.querySelectorAll('input[type="url"]').forEach(input => {
+                    input.value = '';
+                });
+
+                // 重置所有 <select>
+                condition.querySelectorAll('select').forEach(select => {
+                    select.selectedIndex = 0;
+                });
+            });
+        });
+
+        copyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(jsonOutput.textContent).then(() => {
+                alert('JSON 程式碼已複製到剪貼簿！');
+            }).catch((err) => {
+                alert('複製失敗，請手動複製！');
+            });
+        });
+
+        // 初始化條件
+        createCondition();
+    </script>
+</body>
+
+</html>

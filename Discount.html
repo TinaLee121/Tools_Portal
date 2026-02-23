@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>優惠代碼配置生成器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 8px;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 550px;
+            gap: 20px;
+        }
+
+        .left-panel { min-width: 0; }
+
+        .right-panel {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .section:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .info-box {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+
+        .form-group label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group label .required { color: #e74c3c; }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fff;
+            color: #333;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .plan-card {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .plan-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .plan-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .remove-btn:hover { background: #c0392b; }
+
+        .code-block {
+            background: #f5f5f5;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .code-block-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .code-block pre {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 12px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #333;
+            max-height: 300px;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toggle-switch {
+            display: inline-flex;
+            gap: 10px;
+            background: rgba(255,255,255,0.5);
+            padding: 4px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-switch button {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+        }
+
+        .toggle-switch button.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 預覽視窗樣式 */
+        .preview-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .preview-scroll {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
+        /* 優惠券區塊預覽 */
+        .promo-section-preview {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+
+        .promo-title {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .promo-input-display {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .promo-badge-display {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .promo-check-display {
+            background: rgba(46, 204, 113, 0.15);
+            border-left: 3px solid #2ecc71;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #27ae60;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        /* 方案列表預覽 */
+        .plan-list-preview {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 15px;
+            overflow: visible;
+            border: 1px solid #eee;
+        }
+
+        #plan-preview-list,
+        #promo-preview-list {
+            padding-top: 30px;
+            overflow: visible;
+        }
+
+        .plan-list-title {
+            color: #333;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .plan-item-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 18px 18px 18px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: visible;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .plan-badge-preview {
+            position: absolute;
+            top: -29px;
+            left: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .plan-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .plan-item-left {
+            flex: 1;
+            padding-top: 8px;
+        }
+
+        .plan-title-preview {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .plan-price-preview {
+            color: #333;
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .plan-price-original {
+            color: #999;
+            font-size: 14px;
+            text-decoration: line-through;
+        }
+
+        .plan-button-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .empty-preview {
+            color: #999;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content { grid-template-columns: 1fr; }
+            .right-panel { position: relative; top: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .plan-content-wrapper { flex-direction: column; align-items: stretch; }
+            .plan-item-left { padding-top: 32px; }
+            .plan-button-preview { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 優惠代碼配置生成器</h1>
+            <p class="subtitle">快速產生 Firebase Remote Config 的 IAP 設定檔</p>
+        </div>
+
+        <div class="main-content">
+            <!-- 左側編輯區 -->
+            <div class="left-panel">
+                <!-- 切換按鈕 -->
+                <div class="toggle-switch">
+                    <button class="active" onclick="switchSection('plan')">原價方案設定</button>
+                    <button onclick="switchSection('promo')">優惠方案設定</button>
+                </div>
+
+                <!-- 原價方案設定 -->
+                <div id="plan-section" class="section-wrapper">
+                    <div class="section">
+                        <div class="section-title">
+                            原價方案設定 (iapPlanInfoList)
+                            <button class="btn btn-primary" onclick="addPlan()" style="float: right; font-size: 14px;">+ 新增方案</button>
+                        </div>
+
+                        <div class="info-box">
+                            💡 設定用戶在輸入優惠碼前會看到的原價方案
+                        </div>
+
+                        <div id="plan-list"></div>
+
+                        <div class="code-block">
+                            <div class="code-block-header">
+                                <span class="code-block-title">生成的 JSON</span>
+                                <button class="btn btn-outline" onclick="copyAllJSON('plan')">📋 一鍵複製</button>
+                            </div>
+                            <pre id="plan-output">[]</pre>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" onclick="downloadPlanJSON()">💾 下載 JSON</button>
+                            <button class="btn btn-danger" onclick="clearPlans()">清空</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 優惠方案設定 -->
+                <div id="promo-section" class="section-wrapper" style="display: none;">
+                    <div class="section">
+                        <div class="section-title">
+                            優惠方案設定 (iapPromoPlanInfoList)
+                            <button class="btn btn-primary" onclick="addPromo()" style="float: right; font-size: 14px;">+ 新增優惠碼</button>
+                        </div>
+
+                        <div class="info-box">
+                            💡 設定優惠碼及對應的優惠方案,用戶輸入優惠碼後會看到這些方案
+                        </div>
+
+                        <div id="promo-list"></div>
+
+                        <div class="code-block">
+                            <div class="code-block-header">
+                                <span class="code-block-title">生成的 JSON</span>
+                                <button class="btn btn-outline" onclick="copyAllJSON('promo')">📋 一鍵複製</button>
+                            </div>
+                            <pre id="promo-output">[]</pre>
+                        </div>
+
+                        <div class="btn-group">
+                            <button class="btn btn-secondary" onclick="downloadPromoJSON()">💾 下載 JSON</button>
+                            <button class="btn btn-danger" onclick="clearPromos()">清空</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側預覽區 -->
+            <div class="right-panel">
+                <div class="preview-panel">
+                    <div class="preview-title">📱 即時預覽</div>
+                    
+                    <div class="preview-scroll">
+                        <!-- 原價方案預覽 -->
+                        <div id="plan-preview-area">
+                            <div class="plan-list-preview">
+                                <div class="plan-list-title">選擇適合您的方案</div>
+                                <div id="plan-preview-list">
+                                    <div class="empty-preview">請新增方案開始設定</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 優惠方案預覽 -->
+                        <div id="promo-preview-area" style="display: none;">
+                            <div class="promo-section-preview">
+                                <div class="promo-title">優惠券</div>
+                                <div class="promo-input-display">請輸入優惠碼</div>
+                                <div id="promo-code-display"></div>
+                            </div>
+                            
+                            <div class="plan-list-preview">
+                                <div class="plan-list-title">選擇適合您的方案</div>
+                                <div id="promo-preview-list">
+                                    <div class="empty-preview">請新增優惠方案開始設定</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 資料儲存
+        let plans = [];
+        let promos = [];
+        let planCounter = 0;
+        let promoCounter = 0;
+        let currentSection = 'plan';
+
+        // 初始化:預設加入一個方案
+        function init() {
+            addPlan();
+            addPromo();
+        }
+
+        // 切換區塊
+        function switchSection(section) {
+            currentSection = section;
+            document.querySelectorAll('.toggle-switch button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.getElementById('plan-section').style.display = section === 'plan' ? 'block' : 'none';
+            document.getElementById('promo-section').style.display = section === 'promo' ? 'block' : 'none';
+            
+            document.getElementById('plan-preview-area').style.display = section === 'plan' ? 'block' : 'none';
+            document.getElementById('promo-preview-area').style.display = section === 'promo' ? 'block' : 'none';
+        }
+
+        // 重新編號方案
+        function reindexPlans() {
+            plans.forEach((plan, index) => {
+                plan.displayId = index + 1;
+            });
+        }
+
+        // === 原價方案相關 ===
+        function addPlan() {
+            const id = ++planCounter;
+            const plan = {
+                id,
+                displayId: plans.length + 1,
+                iosProductID: '',
+                androidProductID: '',
+                androidBasePlanID: '',
+                iapButtonUrl: '',
+                iapTextLeftUp: '',
+                iapTextUp: '',
+                iapTextDown: ''
+            };
+            plans.push(plan);
+            renderPlans();
+            updatePlanPreview();
+        }
+
+        function renderPlans() {
+            const container = document.getElementById('plan-list');
+            container.innerHTML = plans.map(plan => `
+                <div class="plan-card">
+                    <div class="plan-card-header">
+                        <span class="plan-badge">方案 ${plan.displayId}</span>
+                        <button class="remove-btn" onclick="removePlan(${plan.id})">×</button>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>iOS Product ID <span class="required">*</span></label>
+                            <input type="text" value="${plan.iosProductID}" 
+                                   oninput="updatePlan(${plan.id}, 'iosProductID', this.value)"
+                                   placeholder="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Android Product ID <span class="required">*</span></label>
+                            <input type="text" value="${plan.androidProductID}" 
+                                   oninput="updatePlan(${plan.id}, 'androidProductID', this.value)"
+                                   placeholder="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Android Base Plan ID <span class="required">*</span></label>
+                            <input type="text" value="${plan.androidBasePlanID}" 
+                                   oninput="updatePlan(${plan.id}, 'androidBasePlanID', this.value)"
+                                   placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>IAP 按鈕連結</label>
+                            <input type="text" value="${plan.iapButtonUrl}" 
+                                   oninput="updatePlan(${plan.id}, 'iapButtonUrl', this.value)"
+                                   placeholder="https://test.cmoney.tw/app/ItemContent.aspx?id=4906">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>標籤文字 (左上角) 📱</label>
+                            <input type="text" value="${plan.iapTextLeftUp}" 
+                                   oninput="updatePlan(${plan.id}, 'iapTextLeftUp', this.value)"
+                                   placeholder="">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>方案名稱 📱</label>
+                            <input type="text" value="${plan.iapTextUp}" 
+                                   oninput="updatePlan(${plan.id}, 'iapTextUp', this.value)"
+                                   placeholder="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>價格顯示 📱</label>
+                            <input type="text" value="${plan.iapTextDown}" 
+                                   oninput="updatePlan(${plan.id}, 'iapTextDown', this.value)"
+                                   placeholder="">
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            updatePlanOutput();
+        }
+
+        function updatePlan(id, field, value) {
+            const plan = plans.find(p => p.id === id);
+            if (plan) {
+                plan[field] = value;
+                updatePlanOutput();
+                updatePlanPreview();
+            }
+        }
+
+        function removePlan(id) {
+            plans = plans.filter(p => p.id !== id);
+            reindexPlans();
+            renderPlans();
+            updatePlanPreview();
+        }
+
+        function updatePlanOutput() {
+            const output = plans.map(plan => ({
+                iosProductID: plan.iosProductID,
+                androidProductID: plan.androidProductID,
+                androidBasePlanID: plan.androidBasePlanID,
+                iapButtonUrl: plan.iapButtonUrl,
+                iapTextLeftUp: plan.iapTextLeftUp,
+                iapTextUp: plan.iapTextUp,
+                iapTextDown: plan.iapTextDown
+            }));
+            document.getElementById('plan-output').textContent = JSON.stringify(output, null, 2);
+        }
+
+        function updatePlanPreview() {
+            const container = document.getElementById('plan-preview-list');
+            
+            if (plans.length === 0 || plans.every(p => !p.iapTextLeftUp && !p.iapTextUp && !p.iapTextDown)) {
+                container.innerHTML = '<div class="empty-preview">請新增方案開始設定</div>';
+                return;
+            }
+            
+            container.innerHTML = plans.map(plan => {
+                // 如果都沒有內容就不顯示
+                if (!plan.iapTextLeftUp && !plan.iapTextUp && !plan.iapTextDown) {
+                    return '';
+                }
+                
+                return `
+                    <div class="plan-item-preview">
+                        ${plan.iapTextLeftUp ? `<div class="plan-badge-preview">${plan.iapTextLeftUp}</div>` : ''}
+                        <div class="plan-content-wrapper">
+                            <div class="plan-item-left">
+                                ${plan.iapTextUp ? `<div class="plan-title-preview">${plan.iapTextUp}</div>` : ''}
+                                ${plan.iapTextDown ? `<div class="plan-price-preview">${plan.iapTextDown}</div>` : ''}
+                            </div>
+                            <div class="plan-button-preview">即刻購買</div>
+                        </div>
+                    </div>
+                `;
+            }).join('') || '<div class="empty-preview">請輸入方案資訊</div>';
+        }
+
+        function clearPlans() {
+            if (!confirm('確定要清空所有原價方案嗎？')) return;
+            plans = [];
+            planCounter = 0;
+            addPlan();
+        }
+
+        function downloadPlanJSON() {
+            const data = JSON.parse(document.getElementById('plan-output').textContent);
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `iapPlanInfoList-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ JSON 檔案已下載');
+        }
+
+        // 重新編號優惠方案
+        function reindexPromos() {
+            promos.forEach((promo, index) => {
+                promo.displayId = index + 1;
+            });
+        }
+
+        // === 優惠方案相關 ===
+        function addPromo() {
+            const id = ++promoCounter;
+            const promo = {
+                id,
+                displayId: promos.length + 1,
+                code: '',
+                planInfoList: [{
+                    iosOriginalProductID: '',
+                    iosPromoProductID: '',
+                    androidOriginalBasePlanID: '',
+                    androidPromoBasePlanID: '',
+                    androidOfferID: '',
+                    iapTextLeftUp: '',
+                    iapTextUp: '',
+                    iapTextDown: '',
+                    iapTitleAndPriceControl: 2
+                }]
+            };
+            promos.push(promo);
+            renderPromos();
+            updatePromoPreview();
+        }
+
+        function renderPromos() {
+            const container = document.getElementById('promo-list');
+            container.innerHTML = promos.map(promo => `
+                <div class="plan-card">
+                    <div class="plan-card-header">
+                        <span class="plan-badge">優惠碼 ${promo.displayId}</span>
+                        <button class="remove-btn" onclick="removePromo(${promo.id})">×</button>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>優惠碼 (大寫) <span class="required">*</span></label>
+                        <input type="text" value="${promo.code}" 
+                               oninput="updatePromoCode(${promo.id}, this.value.toUpperCase())"
+                               placeholder="TEST1" style="text-transform: uppercase;">
+                        <span class="hint">優惠碼必須全大寫</span>
+                    </div>
+
+                    ${promo.planInfoList.map((plan, index) => `
+                        <div style="background: white; padding: 15px; border-radius: 4px; margin-bottom: 10px; border: 1px solid #e0e0e0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <strong style="color: #4CAF50;">對應方案 ${index + 1}</strong>
+                                ${promo.planInfoList.length > 1 ? `
+                                    <button class="remove-btn" style="width: 24px; height: 24px; font-size: 16px;" 
+                                            onclick="removePromoPlan(${promo.id}, ${index})">×</button>
+                                ` : ''}
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>iOS 原價 Product ID <span class="required">*</span></label>
+                                    <input type="text" value="${plan.iosOriginalProductID}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'iosOriginalProductID', this.value)">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>iOS 優惠 Product ID <span class="required">*</span></label>
+                                    <input type="text" value="${plan.iosPromoProductID}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'iosPromoProductID', this.value)">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Android 原價 Base Plan ID <span class="required">*</span></label>
+                                    <input type="text" value="${plan.androidOriginalBasePlanID}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'androidOriginalBasePlanID', this.value)">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>Android 優惠 Base Plan ID <span class="required">*</span></label>
+                                    <input type="text" value="${plan.androidPromoBasePlanID}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'androidPromoBasePlanID', this.value)">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Android Offer ID</label>
+                                    <input type="text" value="${plan.androidOfferID}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'androidOfferID', this.value)"
+                                           placeholder="">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>價格顯示控制</label>
+                                    <select onchange="updatePromoPlan(${promo.id}, ${index}, 'iapTitleAndPriceControl', parseInt(this.value))">
+                                        <option value="1" ${plan.iapTitleAndPriceControl === 1 ? 'selected' : ''}>1 - 後台價格</option>
+                                        <option value="2" ${plan.iapTitleAndPriceControl === 2 ? 'selected' : ''}>2 - 自訂文字</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>標籤文字 (左上角) 📱</label>
+                                    <input type="text" value="${plan.iapTextLeftUp}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'iapTextLeftUp', this.value)"
+                                           placeholder="">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>方案名稱 📱</label>
+                                    <input type="text" value="${plan.iapTextUp}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'iapTextUp', this.value)"
+                                           placeholder="">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label>價格顯示 📱</label>
+                                    <input type="text" value="${plan.iapTextDown}" 
+                                           oninput="updatePromoPlan(${promo.id}, ${index}, 'iapTextDown', this.value)"
+                                           placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                    
+                    <button class="btn btn-outline" onclick="addPromoPlan(${promo.id})" style="width: 100%;">+ 新增對應方案</button>
+                </div>
+            `).join('');
+            updatePromoOutput();
+        }
+
+        function updatePromo(id, field, value) {
+            const promo = promos.find(p => p.id === id);
+            if (promo) {
+                promo[field] = value;
+                updatePromoOutput();
+                updatePromoPreview();
+            }
+        }
+
+        function updatePromoCode(id, value) {
+            const promo = promos.find(p => p.id === id);
+            if (promo) {
+                promo.code = value;
+                updatePromoOutput();
+                // 不呼叫 updatePromoPreview(),所以不會更新預覽
+            }
+        }
+
+        function updatePromoPlan(promoId, planIndex, field, value) {
+            const promo = promos.find(p => p.id === promoId);
+            if (promo && promo.planInfoList[planIndex]) {
+                promo.planInfoList[planIndex][field] = value;
+                updatePromoOutput();
+                updatePromoPreview();
+            }
+        }
+
+        function addPromoPlan(promoId) {
+            const promo = promos.find(p => p.id === promoId);
+            if (promo) {
+                promo.planInfoList.push({
+                    iosOriginalProductID: '',
+                    iosPromoProductID: '',
+                    androidOriginalBasePlanID: '',
+                    androidPromoBasePlanID: '',
+                    androidOfferID: '',
+                    iapTextLeftUp: '',
+                    iapTextUp: '',
+                    iapTextDown: '',
+                    iapTitleAndPriceControl: 2
+                });
+                renderPromos();
+            }
+        }
+
+        function removePromoPlan(promoId, planIndex) {
+            const promo = promos.find(p => p.id === promoId);
+            if (promo && promo.planInfoList.length > 1) {
+                promo.planInfoList.splice(planIndex, 1);
+                renderPromos();
+            }
+        }
+
+        function removePromo(id) {
+            promos = promos.filter(p => p.id !== id);
+            reindexPromos();
+            renderPromos();
+            updatePromoPreview();
+        }
+
+        function updatePromoOutput() {
+            const output = promos.map(promo => ({
+                code: promo.code,
+                planInfoList: promo.planInfoList.map(plan => ({
+                    iosOriginalProductID: plan.iosOriginalProductID,
+                    iosPromoProductID: plan.iosPromoProductID,
+                    androidOriginalBasePlanID: plan.androidOriginalBasePlanID,
+                    androidPromoBasePlanID: plan.androidPromoBasePlanID,
+                    androidOfferID: plan.androidOfferID,
+                    iapTextLeftUp: plan.iapTextLeftUp,
+                    iapTextUp: plan.iapTextUp,
+                    iapTextDown: plan.iapTextDown,
+                    iapTitleAndPriceControl: plan.iapTitleAndPriceControl
+                }))
+            }));
+            document.getElementById('promo-output').textContent = JSON.stringify(output, null, 2);
+        }
+
+        function updatePromoPreview() {
+            // 更新優惠碼顯示
+            const codeDisplay = document.getElementById('promo-code-display');
+            const firstPromo = promos[0];
+            if (firstPromo && firstPromo.code) {
+                codeDisplay.innerHTML = `<div class="promo-badge-display">${firstPromo.code}</div>`;
+            } else {
+                codeDisplay.innerHTML = '';
+            }
+
+            // 更新方案列表
+            const container = document.getElementById('promo-preview-list');
+            
+            const hasContent = promos.some(promo => 
+                promo.planInfoList.some(plan => 
+                    plan.iapTextLeftUp || plan.iapTextUp || plan.iapTextDown
+                )
+            );
+            
+            if (!hasContent) {
+                container.innerHTML = '<div class="empty-preview">請新增優惠方案開始設定</div>';
+                return;
+            }
+            
+            container.innerHTML = promos.flatMap(promo => 
+                promo.planInfoList.map(plan => {
+                    // 如果都沒有內容就不顯示
+                    if (!plan.iapTextLeftUp && !plan.iapTextUp && !plan.iapTextDown) {
+                        return '';
+                    }
+                    
+                    return `
+                        <div class="plan-item-preview">
+                            ${plan.iapTextLeftUp ? `<div class="plan-badge-preview">${plan.iapTextLeftUp}</div>` : ''}
+                            <div class="plan-content-wrapper">
+                                <div class="plan-item-left">
+                                    ${plan.iapTextUp ? `<div class="plan-title-preview">${plan.iapTextUp}</div>` : ''}
+                                    ${plan.iapTextDown ? `<div class="plan-price-preview">${plan.iapTextDown}</div>` : ''}
+                                </div>
+                                <div class="plan-button-preview">即刻購買</div>
+                            </div>
+                        </div>
+                    `;
+                })
+            ).join('') || '<div class="empty-preview">請輸入方案資訊</div>';
+        }
+
+        function clearPromos() {
+            if (!confirm('確定要清空所有優惠方案嗎？')) return;
+            promos = [];
+            promoCounter = 0;
+            addPromo();
+        }
+
+        function downloadPromoJSON() {
+            const data = JSON.parse(document.getElementById('promo-output').textContent);
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `iapPromoPlanInfoList-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('✅ JSON 檔案已下載');
+        }
+
+        // === 通用功能 ===
+        function copyAllJSON(type) {
+            const elementId = type === 'plan' ? 'plan-output' : 'promo-output';
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✅ 已複製 JSON 到剪貼簿');
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

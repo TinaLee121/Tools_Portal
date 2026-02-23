@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON 工具統一入口</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .nav-bar {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .nav-tab:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #764ba2;
+        }
+        .content-container {
+            display: none;
+            min-height: calc(100vh - 70px);
+        }
+        .content-container.active {
+            display: block;
+        }
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 70px);
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .welcome-screen h1 {
+            color: white;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .welcome-screen p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.2em;
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+        .tool-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 900px;
+            width: 100%;
+        }
+        .tool-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .tool-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .tool-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+        }
+        .tool-card h3 { font-size: 1.3em; color: #333; margin-bottom: 10px; }
+        .tool-card p { color: #666; line-height: 1.6; font-size: 0.95em; }
+        iframe {
+            width: 100%;
+            height: calc(100vh - 70px);
+            border: none;
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .nav-container { flex-direction: column; gap: 15px; }
+            .nav-tabs { width: 100%; justify-content: center; flex-wrap: wrap; }
+            .nav-tab { flex: 1; min-width: 100px; text-align: center; }
+            .welcome-screen h1 { font-size: 2em; }
+            .tool-cards { grid-template-columns: 1fr; max-width: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <div class="nav-title">🛠️ JSON 工具統一入口</div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showContent('home')">首頁</button>
+                <button class="nav-tab" onclick="showContent('marketing')">行銷彈窗</button>
+                <button class="nav-tab" onclick="showContent('marquee')">跑馬燈</button>
+                <button class="nav-tab" onclick="showContent('discount')">優惠代碼</button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="home" class="content-container active">
+        <div class="welcome-screen">
+            <h1>歡迎使用 JSON 工具平台</h1>
+            <p>選擇下方工具開始創建你的 JSON 配置文件</p>
+            <div class="tool-cards">
+                <div class="tool-card" onclick="showContent('marketing')">
+                    <div class="tool-icon">📱</div>
+                    <h3>行銷彈窗產生器</h3>
+                    <p>快速建立和管理應用程式的彈出通知設定，支援多種用戶類型和顯示條件</p>
+                </div>
+                <div class="tool-card" onclick="showContent('marquee')">
+                    <div class="tool-icon">📰</div>
+                    <h3>跑馬燈產生器</h3>
+                    <p>建立動態的跑馬燈內容配置，支援多種顏色和自訂時間範圍</p>
+                </div>
+                <div class="tool-card" onclick="showContent('discount')">
+                    <div class="tool-icon">🎫</div>
+                    <h3>優惠代碼配置生成器</h3>
+                    <p>快速產生 Firebase Remote Config 的 IAP 設定檔，支援原價方案與優惠方案</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="marketing" class="content-container">
+        <iframe src="MarketingPopUp.html" title="行銷彈窗產生器"></iframe>
+    </div>
+
+    <div id="marquee" class="content-container">
+        <iframe src="MarqueeGenerator.html" title="跑馬燈產生器"></iframe>
+    </div>
+
+    <div id="discount" class="content-container">
+        <iframe src="Discount.html" title="優惠代碼配置生成器"></iframe>
+    </div>
+
+    <script>
+        function showContent(contentId) {
+            document.querySelectorAll('.content-container').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            const target = document.getElementById(contentId);
+            if (target) {
+                target.classList.add('active');
+            }
+            const activeTab = document.querySelector(`.nav-tab[onclick="showContent('${contentId}')"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
